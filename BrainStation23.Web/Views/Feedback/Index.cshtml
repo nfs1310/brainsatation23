@@ -1,0 +1,142 @@
+﻿
+@{
+    ViewBag.Title = "Feedback Report";
+}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+<h2>Feedback Report</h2>
+
+<div class="row">
+    <div class="col-lg-12">
+        <table id="tblFeedback" class="table table-hover myclass">
+            <thead>
+                <tr>
+                    <th>Body</th>
+                    <th>User Type</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    $(function () {
+        //$('#FeedbackDataTable').DataTable();
+    });
+
+    $(document).ready(function () {
+        loadPostList();
+        loadCommentsList();
+
+        //Get
+        function loadCommentsList() {
+            var url = '/api/Comments/';
+            //console.log(url);
+
+            var commentList = '';
+
+            $.ajax({
+                url: url,
+                dataType: "json",
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    console.log(data);
+
+                    $.each(data, function (index, value) {
+                        commentList += '<tr><td>' + value.CommentBody + '</td><td>' + value.UserType + '</td><td>' + value.AddedOn + '</td><td>' + '<a href="#" id="' + value.CommentID + '" class="likeRow" Title="Like"><i class="fa fa-angle-up" aria-hidden="true" style="color:green;"></i></i>' + value.Likes + '</a> &nbsp <a href="#" id="' + value.CommentBody + '" class="dislikeRow" Title="Like"><i class="fa fa-angle-down" aria-hidden="true" style="color:red;"></i></i>' + value.Dislikes + '</a>' + '</td></tr>';
+                    });
+
+                    $('#tblFeedback').append(commentList)
+
+
+                },
+                error: function (data) {
+                    console.error(data);
+                }
+            });
+        }
+
+        function loadPostList() {
+            var url = '/api/Posts/';
+
+            $.ajax({
+                url: url,
+                dataType: "json",
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    console.log(data);
+
+                    $.each(data, function (index, value) {
+                        var postList = '';
+                        postList += '<tr class=post' + value.PostID + '><td>' + value.PostBody + '</td><td>' + value.UserType + '</td><td>' + value.AddedDate + '</td><td></td></tr>';
+
+                        $('#tblFeedback').append(postList);
+                    });
+
+                },
+                error: function (data) {
+                    console.error(data);
+                }
+            });
+        }
+
+
+        $(document).on("click", ".likeRow", function () {
+            var id = $(this).attr("id")
+            
+            var url = '/api/Comments/';
+
+            $.ajax({
+                url: url,
+                dataType: "json",
+                type: 'PUT',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, value:'1' }),
+                success: function (data) {
+                    console.log(data);
+
+                    loadPostList();
+                    loadCommentsList();
+                },
+                error: function (data) {
+                    console.error(data);
+                }
+            });
+        });
+
+        $(document).on("click", ".dislikeRow", function () {
+            var cid = $(this).attr("id")
+
+            var url = '/api/Comments/';
+
+            $.ajax({
+                url: url,
+                dataType: "json",
+                type: 'PUT',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: cid, value: '-1' }),
+                success: function (data) {
+                    console.log(data);
+
+                    loadPostList();
+                    loadCommentsList();
+                },
+                error: function (data) {
+                    console.error(data);
+                }
+            });
+        });
+
+    });
+
+</script>
+
